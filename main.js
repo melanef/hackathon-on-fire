@@ -1,5 +1,7 @@
 const clock = 40;
 const speed = 200;
+const jump = 100;
+
 let score;
 
 window.addEventListener("load", initialize);
@@ -11,6 +13,7 @@ let obstacles = [];
 let ground;
 let background;
 let sky;
+let character;
 
 let message;
 
@@ -25,24 +28,41 @@ function initialize() {
   };
 
   message = document.getElementById("message");
-  message.innerText = "Press 'space' to begin; press 'enter' to pause";
+  message.innerText = "Press 'enter' to begin; press 'esc' to pause";
 
   ground = document.getElementById("ground");
   background = document.getElementById("background");
   sky = document.getElementById("sky");
+  character = {
+    isJumping: false,
+    y: 0,
+    element: document.getElementById('character'),
+  };
+  character.element.style.top = `${0 - (character.y + 75)}px`;
 
   spawnHill();
-  window.addEventListener("keypress", (event) => {
-    if (state !== "playing" && event.key === " ") {
-      play();
-      return;
-    }
+  window.addEventListener("keydown", listener);
+}
 
-    if (state === "playing" && event.key === "Enter") {
+function listener(event) {
+  console.log(event);
+
+  if (state !== "playing" && event.key === "Enter") {
+    play();
+    return;
+  }
+
+  if (state === "playing") {
+    if (event.key === "Escape") {
       pause();
       return;
     }
-  })
+
+    if (event.key === "ArrowUp" && !character.isJumping && character.y === 0) {
+      character.isJumping = true;
+      return;
+    }
+  }
 }
 
 function play() {
@@ -57,7 +77,7 @@ function play() {
 function pause() {
   state = "paused";
 
-  message.innerText = "Paused. Press 'space' to resume";
+  message.innerText = "Paused. Press 'enter' to resume";
   message.style.display = "block";
 
   window.clearInterval(interval);
@@ -82,6 +102,23 @@ function spawnHill() {
 function step() {
   score.element.innerText = score.value;
   stepHills();
+  stepCharacter();
+
+}
+
+function stepCharacter() {
+  if (character.isJumping) {
+    if (character.y >= jump) {
+      character.isJumping = false;
+      return;
+    }
+
+    character.y += 10;
+  } else if (character.y > 0) {
+    character.y = Math.max(0, character.y - 10);
+  }
+
+  character.element.style.top = `${0 - (character.y + 75)}px`;
 }
 
 function stepHills() {

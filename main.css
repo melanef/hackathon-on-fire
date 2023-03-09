@@ -28,6 +28,15 @@ body {
   left: 40%;
 }
 
+#character {
+  position: absolute;
+  border: dashed 1px #333377;
+  height: 200px;
+  width: 120px;
+  left: 100px;
+  text-align: center;
+}
+
 #ground {
   position: absolute;
   border-top: dotted 2px #6a4a3a;
