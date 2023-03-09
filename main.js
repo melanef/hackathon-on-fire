@@ -1,9 +1,11 @@
 import bugIcon from "bundle-text:./icons/bug.svg";
 import hillIcon from "bundle-text:./icons/hill.svg";
 import Character from './engine/Character';
+import Difficulty from './engine/Difficulty';
+import Score from './engine/Score';
 
 const clock = 50;
-let difficultySpeed = 0;
+const difficulty = new Difficulty();
 
 let debugging = false;
 let score;
@@ -26,10 +28,7 @@ let state;
 
 function initialize() {
   state = "initialized";
-  score = {
-    value: 0,
-    element: document.getElementById("score"),
-  };
+  score = new Score(document.getElementById("score"), difficulty);
 
   message = document.getElementById("message");
   message.innerText = "Press 'enter' to begin; press 'esc' to pause";
@@ -44,7 +43,8 @@ function initialize() {
 }
 
 function reset() {
-  score.value = 0;
+  difficulty.reset();
+  score.reset();
   character.reset();
 
   for (let i = 0; i < obstacles.length; i++) {
@@ -145,7 +145,7 @@ function spawnObstacle() {
 }
 
 function step() {
-  score.element.innerText = score.value;
+
   stepHills();
   stepObstacle();
   character.tick();
@@ -156,6 +156,9 @@ function step() {
     console.log(e);
     die();
   }
+
+  score.tick();
+  difficulty.tick();
 }
 
 function stepHills() {
@@ -165,7 +168,7 @@ function stepHills() {
 
   for (let i = 0; i < hills.length; i++) {
     const hill = hills[i];
-    hill.x = hill.x - ((difficultySpeed + character.getBaseSpeed()) * 0.3);
+    hill.x = hill.x - ((difficulty.get() + character.getBaseSpeed()) * 0.3);
     hill.element.style.left = `${hill.x}px`;
 
     if (hill.x < 0 - hill.element.offsetWidth) {
@@ -188,13 +191,13 @@ function stepObstacle() {
 
   for (let i = 0; i < obstacles.length; i++) {
     const obstacle = obstacles[i];
-    obstacle.x = obstacle.x - (difficultySpeed + character.getBaseSpeed());
+    obstacle.x = obstacle.x - (difficulty.get() + character.getBaseSpeed());
     obstacle.element.style.left = `${obstacle.x}px`;
 
     if (obstacle.x < 0 - obstacle.element.offsetWidth) {
       obstacle.element.remove();
       obstacles = obstacles.filter((value, j) => j !== i);
-      score.value++;
+      score.incrementByObstacle();
       break;
     }
   }
