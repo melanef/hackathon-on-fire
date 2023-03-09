@@ -1,6 +1,7 @@
 const clock = 40;
 const speed = 200;
 const jump = 100;
+const cooldown = 50;
 
 let score;
 
@@ -35,6 +36,7 @@ function initialize() {
   sky = document.getElementById("sky");
   character = {
     isJumping: false,
+    cooldown: 0,
     y: 0,
     element: document.getElementById('character'),
   };
@@ -58,8 +60,9 @@ function listener(event) {
       return;
     }
 
-    if (event.key === "ArrowUp" && !character.isJumping && character.y === 0) {
+    if (event.key === "ArrowUp" && !character.isJumping && character.y === 0 && character.cooldown === 0) {
       character.isJumping = true;
+      character.cooldown = cooldown;
       return;
     }
   }
@@ -116,6 +119,10 @@ function stepCharacter() {
     character.y += 10;
   } else if (character.y > 0) {
     character.y = Math.max(0, character.y - 10);
+  }
+
+  if (character.y === 0 && character.cooldown !== 0) {
+    character.cooldown = Math.max(0, character.cooldown - 10);
   }
 
   character.element.style.top = `${0 - (character.y + 75)}px`;
