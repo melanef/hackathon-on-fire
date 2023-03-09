@@ -1,10 +1,13 @@
+import { Tickeable } from "./Tickeable";
+
 const TICK_THRESHOLD = 15;
 
-export default class Difficulty {
+export default class Difficulty extends Tickeable {
   private value: number = 0;
   private tickCounter: number = 0;
 
   constructor() {
+    super();
   }
 
   tick() {

@@ -3,6 +3,7 @@ import hillIcon from "bundle-text:./icons/hill.svg";
 import Character from './engine/Character';
 import Difficulty from './engine/Difficulty';
 import Score from './engine/Score';
+import CloudManager from './engine/CloudManager';
 
 const clock = 50;
 const difficulty = new Difficulty();
@@ -13,7 +14,6 @@ let score;
 window.addEventListener("load", initialize);
 
 let hills = [];
-let clouds = [];
 let obstacles = [];
 
 let ground;
@@ -26,6 +26,8 @@ let message;
 let interval;
 let state;
 
+let cloudManager;
+
 function initialize() {
   state = "initialized";
   score = new Score(document.getElementById("score"), difficulty);
@@ -36,6 +38,8 @@ function initialize() {
   ground = document.getElementById("ground");
   background = document.getElementById("background");
   sky = document.getElementById("sky");
+
+  cloudManager = new CloudManager(score, sky);
 
   character = new Character(document.getElementById('character'));
 
@@ -66,6 +70,10 @@ function listener(event) {
   if (state === "dead" && event.key === "Enter") {
     reset();
     return;
+  }
+
+  if (state === "dead" && event.key === "F2") {
+    console.log(score.getHighest());
   }
 
   if (state !== "playing" && event.key === "Enter") {
@@ -113,6 +121,8 @@ function die() {
 
   window.clearInterval(interval);
   interval = null;
+
+  score.save();
 }
 
 function spawnHill() {
@@ -145,10 +155,12 @@ function spawnObstacle() {
 }
 
 function step() {
+  const characterSpeed = difficulty.get() + character.getRunningSpeed();
 
-  stepHills();
-  stepObstacle();
-  character.tick();
+  cloudManager.tick(characterSpeed);
+  stepHills(characterSpeed);
+  stepObstacle(characterSpeed);
+  character.tick(difficulty.get());
 
   try {
     checkCollisions();
@@ -161,14 +173,14 @@ function step() {
   difficulty.tick();
 }
 
-function stepHills() {
+function stepHills(speed) {
   if (hills.length === 0) {
     spawnHill();
   }
 
   for (let i = 0; i < hills.length; i++) {
     const hill = hills[i];
-    hill.x = hill.x - ((difficulty.get() + character.getBaseSpeed()) * 0.3);
+    hill.x = hill.x - (speed * 0.3);
     hill.element.style.left = `${hill.x}px`;
 
     if (hill.x < 0 - hill.element.offsetWidth) {
@@ -184,20 +196,20 @@ function stepHills() {
   }
 }
 
-function stepObstacle() {
+function stepObstacle(speed) {
   if (obstacles.length === 0) {
     spawnObstacle();
   }
 
   for (let i = 0; i < obstacles.length; i++) {
     const obstacle = obstacles[i];
-    obstacle.x = obstacle.x - (difficulty.get() + character.getBaseSpeed());
+    obstacle.x = obstacle.x - speed;
     obstacle.element.style.left = `${obstacle.x}px`;
 
     if (obstacle.x < 0 - obstacle.element.offsetWidth) {
       obstacle.element.remove();
       obstacles = obstacles.filter((value, j) => j !== i);
-      score.incrementByObstacle();
+      score.applyObstacleBonus();
       break;
     }
   }
@@ -234,6 +246,8 @@ function checkCollisions() {
       throw new Error();
     }
   }
+
+  cloudManager.checkCollisions(character);
 }
 
 function getElementBoundaries(element) {
