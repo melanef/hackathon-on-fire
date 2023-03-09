@@ -1,0 +1,50 @@
+body {
+  width: 50%;
+  margin: 0 50px;
+}
+
+#screen-container {
+  position: relative;
+}
+
+#screen {
+  position: absolute;
+  border: solid 4px #252525;
+  top: 200px;
+  left: 50px;
+  right: 50px;
+  bottom: 100px;
+}
+
+#background {
+  position: relative;
+  background: #cccccc;
+  height: 100%;
+}
+
+#message {
+  position: absolute;
+  top: 40%;
+  left: 40%;
+}
+
+#ground {
+  position: absolute;
+  border-top: dotted 2px #6a4a3a;
+  background: #8b6c5c;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 35%;
+}
+
+#ground .hill {
+  position: absolute;
+  height: 100px;
+  width: 100px;
+}
+
+#ground .hill svg {
+  height: 100%;
+  width: 100%;
+}
